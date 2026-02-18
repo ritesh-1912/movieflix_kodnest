@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { login as apiLogin } from '../api/auth'
+import { getLoginErrorMessage } from '../utils/authErrors'
 
 const Login = () => {
   const [username, setUsername] = useState('')
@@ -33,20 +34,7 @@ const Login = () => {
       login(res.user)
       navigate('/', { replace: true })
     } catch (err) {
-      // Normalize different error shapes (backend string, Vercel JSON, network errors, etc.)
-      const responseData = err.response?.data
-      let message =
-        // Our backend: { error: '...' }
-        (responseData && typeof responseData === 'object' && responseData.error) ||
-        // Common shapes: { message: '...' }
-        (responseData && typeof responseData === 'object' && responseData.message) ||
-        // If backend sent a plain string body
-        (typeof responseData === 'string' ? responseData : null) ||
-        // Fallbacks
-        err.message ||
-        'Invalid username or password. Please try again.'
-
-      setError(message)
+      setError(getLoginErrorMessage(err))
     } finally {
       setLoading(false)
     }
