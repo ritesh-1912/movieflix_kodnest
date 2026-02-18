@@ -1,226 +1,219 @@
-# MovieFlix - Netflix-style Movie Streaming App
+# MovieFlix – Netflix-style Movie Streaming App
 
-A premium, Netflix-inspired movie streaming application built with React, featuring TMDB API integration, user authentication with PostgreSQL (Aiven), and a beautiful, cinematic UI.
+A premium, Netflix-inspired movie streaming application built with React and Vite, featuring TMDB API integration, user authentication with PostgreSQL (Aiven), serverless auth on Vercel, and a cinematic UI with profile dropdown, expandable search, and smooth scrolling.
+
+---
 
 ## Features
 
-- 🎬 **Netflix-style UI** - Cinematic design with full-bleed hero sections, smooth animations, and premium UX
-- 🔐 **User Authentication** - Secure registration and login with bcrypt password hashing
-- 💾 **PostgreSQL Database** - Aiven PostgreSQL for user management
-- 🎥 **TMDB Integration** - Browse trending, popular, top-rated, and upcoming movies
-- 🎭 **Genre Discovery** - Explore movies by genre (Action, Comedy, etc.)
-- 📱 **Fully Responsive** - Beautiful on desktop, tablet, and mobile
-- 🎨 **Premium Typography** - Bebas Neue for headings, Inter for body text
-- ⚡ **Fast & Smooth** - Optimized animations and transitions
+- **Netflix-style UI** – Full-bleed hero, horizontal movie rows, smooth animations, dark theme
+- **User authentication** – Register and login with bcrypt; session via localStorage
+- **PostgreSQL (Aiven)** – User storage; optional SQLite locally for favorites/watch history
+- **TMDB integration** – Trending, popular, top-rated, upcoming, and genre-based movies
+- **Profile dropdown** – Account, Help Centre, Sign out; smooth fade in/out
+- **Expandable search** – Search icon expands to bar with placeholder “Titles, people, genres”
+- **Responsive layout** – Desktop, tablet, and mobile
+- **Footer** – Company/Legal/Help links, social icons (Facebook, Instagram, Twitter, YouTube), copyright
+- **Smooth scroll** – Native trackpad/mouse scroll over movie rows (no custom wheel handler)
+- **Vercel deployment** – Frontend + serverless auth API routes; see [VERCEL_SETUP.md](./VERCEL_SETUP.md)
+
+---
+
+## Tech Stack
+
+### Frontend
+
+| Technology    | Purpose / version |
+|---------------|--------------------|
+| **React**     | UI (^18.2.0)       |
+| **Vite**      | Build, dev server, HMR (^5.0.8) |
+| **React Router** | Client-side routing (^6.20.0) |
+| **Tailwind CSS**  | Styling (^3.4.0)   |
+| **PostCSS**   | CSS processing (^8.4.32) |
+| **Autoprefixer** | Vendor prefixes (^10.4.16) |
+| **Axios**     | HTTP client (^1.6.2) |
+| **Bebas Neue** | Display font (Google Fonts) |
+| **Inter**     | Body font (Google Fonts) |
+
+### Backend (local / Express)
+
+| Technology    | Purpose / version |
+|---------------|--------------------|
+| **Node.js**   | Runtime (v16+)     |
+| **Express**   | API server (^4.18.2) |
+| **pg**        | PostgreSQL client (^8.11.3) |
+| **bcrypt**    | Password hashing (^5.1.1) |
+| **dotenv**    | Env vars (^16.3.1) |
+| **cors**      | CORS (^2.8.5)      |
+| **better-sqlite3** | Optional SQLite (^9.2.2, optionalDependencies) |
+
+### Backend (Vercel serverless)
+
+| Technology    | Purpose |
+|---------------|---------|
+| **Vercel Serverless Functions** | `/api/auth/login`, `/api/auth/register` (Web Standard `fetch`) |
+| **Node.js**   | Runtime for API routes |
+| **pg**        | PostgreSQL (same as local) |
+| **bcrypt**    | Password hashing (same as local) |
+
+### Database
+
+| Technology    | Purpose |
+|---------------|---------|
+| **PostgreSQL (Aiven)** | Users table (username, email, password hash, phone_number) |
+| **SQLite (optional)** | Favorites, watch history, preferences (local Express only) |
+
+### DevOps / Tooling
+
+| Technology    | Purpose |
+|---------------|---------|
+| **Git**       | Version control |
+| **GitHub**    | Repo hosting |
+| **Vercel**    | Hosting, serverless functions, env vars |
+| **concurrently** | Run frontend + Express together (^8.2.2) |
+
+---
 
 ## Prerequisites
 
-- Node.js (v16 or higher)
-- npm or yarn
-- TMDB API key ([Get one here](https://www.themoviedb.org/settings/api))
-- Aiven PostgreSQL database (or any PostgreSQL instance)
+- **Node.js** v16 or higher  
+- **npm** (or yarn)  
+- **TMDB API key** – [Get one](https://www.themoviedb.org/settings/api)  
+- **PostgreSQL** – e.g. Aiven PostgreSQL (or any Postgres instance)
 
-## Setup Instructions
+---
 
-1. **Clone the repository:**
+## Setup
+
+1. **Clone and install**
    ```bash
    git clone https://github.com/ritesh-1912/movieflix_kodnest.git
    cd movieflix_kodnest
-   ```
-
-2. **Install dependencies:**
-   ```bash
    npm install
    ```
 
-3. **Set up environment variables:**
+2. **Environment variables**
    ```bash
    cp .env.example .env
    ```
-   Then edit `.env` and add your credentials:
+   Edit `.env`:
    ```env
-   VITE_TMDB_API_KEY=your_tmdb_api_key_here
-   DATABASE_URL=postgres://username:password@host:port/database?sslmode=require
+   VITE_TMDB_API_KEY=your_tmdb_api_key
+   DATABASE_URL=postgres://user:password@host:port/dbname?sslmode=require
    ```
 
-4. **Run the development servers:**
+3. **Run locally**
    ```bash
    npm run dev:all
    ```
-   
-   This will start both:
-   - Frontend server on `http://localhost:3000`
-   - Backend API server on `http://localhost:3001`
-   
-   Or run them separately:
-   ```bash
-   # Terminal 1 - Frontend
-   npm run dev
-   
-   # Terminal 2 - Backend
-   npm run server
-   ```
+   - Frontend: http://localhost:3000  
+   - Backend: http://localhost:3001  
 
-## Database Schema
+   Or separately: `npm run dev` and `npm run server`.
 
-### PostgreSQL (Aiven) - User Authentication
+---
 
-The `users` table is automatically created on server startup:
+## Project structure
+
+```
+movieflix_kodnest/
+├── api/                    # Vercel serverless (auth only)
+│   ├── db.js               # PostgreSQL pool for serverless
+│   ├── auth/
+│   │   ├── login.js
+│   │   └── register.js
+├── server/                  # Express (local)
+│   ├── db.js
+│   └── index.js
+├── src/
+│   ├── api/auth.js         # Auth API client
+│   ├── components/
+│   │   ├── Header.jsx      # Nav, search bar, profile dropdown
+│   │   ├── Hero.jsx
+│   │   ├── MovieRow.jsx
+│   │   ├── Footer.jsx      # Links + social icons
+│   │   └── ProtectedRoute.jsx
+│   ├── context/AuthContext.jsx
+│   ├── pages/
+│   │   ├── Home.jsx
+│   │   ├── Login.jsx
+│   │   └── Register.jsx
+│   ├── utils/
+│   │   ├── tmdb.js
+│   │   └── authErrors.js   # User-facing error messages
+│   ├── App.jsx
+│   ├── main.jsx
+│   └── index.css
+├── .env.example
+├── vercel.json             # Build + output for Vercel
+├── vite.config.js
+├── tailwind.config.js
+├── package.json
+├── README.md
+└── VERCEL_SETUP.md         # Vercel env + redeploy guide
+```
+
+---
+
+## API
+
+### Auth (used by frontend; implemented in Express and in Vercel `api/`)
+
+- **POST /api/auth/register** – Body: `{ username, password, email, phone_number }`
+- **POST /api/auth/login** – Body: `{ username, password }`
+
+### Optional (Express only, when SQLite is available)
+
+- `GET/POST /api/favorites`, `DELETE /api/favorites/:movieId`
+- `GET/POST /api/watch-history`, `GET/POST /api/preferences`
+
+---
+
+## Database schema (PostgreSQL)
 
 ```sql
 CREATE TABLE users (
   "userID" SERIAL PRIMARY KEY,
   username VARCHAR(255) NOT NULL UNIQUE,
-  password VARCHAR(255) NOT NULL,  -- bcrypt hashed
+  password VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL UNIQUE,
   phone_number VARCHAR(50) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
-### SQLite (Optional) - Favorites & Watch History
+Created automatically on first use (Express or Vercel).
 
-If `better-sqlite3` is available, the following tables are created:
+---
 
-- **`favorites`** - User's favorite movies
-- **`watch_history`** - Movies the user has watched
-- **`user_preferences`** - User preferences and settings
+## Environment variables
 
-## Project Structure
+| Variable            | Required | Description |
+|---------------------|----------|-------------|
+| `VITE_TMDB_API_KEY` | Yes      | TMDB API key (client + build) |
+| `DATABASE_URL`      | Yes      | PostgreSQL URL (server + Vercel API routes) |
 
-```
-movieflix_kodnest/
-├── src/
-│   ├── api/
-│   │   └── auth.js          # Authentication API calls
-│   ├── components/
-│   │   ├── Header.jsx       # Navigation header
-│   │   ├── Hero.jsx         # Featured movie hero section
-│   │   ├── MovieRow.jsx     # Horizontal scrolling movie rows
-│   │   └── ProtectedRoute.jsx  # Route protection
-│   ├── context/
-│   │   └── AuthContext.jsx # Authentication context
-│   ├── pages/
-│   │   ├── Home.jsx         # Main landing page (protected)
-│   │   ├── Login.jsx        # Login page
-│   │   └── Register.jsx     # Registration page
-│   ├── utils/
-│   │   └── tmdb.js          # TMDB API integration
-│   ├── App.jsx              # Main app component
-│   ├── main.jsx             # Entry point
-│   └── index.css            # Global styles
-├── server/
-│   ├── db.js                # PostgreSQL connection
-│   └── index.js             # Express backend
-├── package.json
-└── vite.config.js
-```
+---
 
-## API Endpoints
+## Deploying to Vercel
 
-### Authentication
-- `POST /api/auth/register` - Register a new user
-  ```json
-  {
-    "username": "string",
-    "password": "string",
-    "email": "string",
-    "phone_number": "string"
-  }
-  ```
-- `POST /api/auth/login` - Login user
-  ```json
-  {
-    "username": "string",
-    "password": "string"
-  }
-  ```
+- Set **`DATABASE_URL`** in Vercel → Settings → Environment Variables (Production, and Preview if needed).
+- **Redeploy** after adding or changing env vars.
+- Full steps and troubleshooting: **[VERCEL_SETUP.md](./VERCEL_SETUP.md)**.
 
-### Movies (SQLite - Optional)
-- `GET /api/favorites` - Get all favorite movies
-- `POST /api/favorites` - Add a movie to favorites
-- `DELETE /api/favorites/:movieId` - Remove a movie from favorites
-- `GET /api/watch-history` - Get watch history
-- `POST /api/watch-history` - Add to watch history
-- `GET /api/preferences` - Get user preferences
-- `POST /api/preferences` - Update user preferences
+---
 
-## User Flow
+## Scripts
 
-1. **Registration** → User creates account → Redirected to Login
-2. **Login** → User authenticates → Redirected to Home
-3. **Home** → Protected route showing Netflix-style landing page with movies
-4. **Browse** → Scroll through movie rows, hover for details
-5. **Logout** → Sign out → Redirected to Login
+| Command        | Description |
+|----------------|-------------|
+| `npm run dev`  | Start Vite dev server |
+| `npm run build`| Production build (Vite) |
+| `npm run preview` | Preview production build |
+| `npm run server`  | Start Express API |
+| `npm run dev:all` | Frontend + Express together |
 
-## Technologies Used
-
-### Frontend
-- **React 18** - UI library
-- **Vite** - Build tool
-- **React Router** - Routing
-- **Tailwind CSS** - Styling
-- **Axios** - HTTP client
-- **Bebas Neue** - Display font (Google Fonts)
-- **Inter** - Body font (Google Fonts)
-
-### Backend
-- **Express.js** - Web framework
-- **PostgreSQL** (via `pg`) - User database (Aiven)
-- **bcrypt** - Password hashing
-- **SQLite** (better-sqlite3, optional) - Favorites/history
-- **CORS** - Cross-origin resource sharing
-- **dotenv** - Environment variables
-
-## Security Features
-
-- ✅ Passwords hashed with bcrypt (10 rounds)
-- ✅ Passwords never returned in API responses
-- ✅ Protected routes require authentication
-- ✅ Session persistence via localStorage
-- ✅ SSL connection to PostgreSQL
-- ✅ Input validation and sanitization
-
-## Environment Variables
-
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `VITE_TMDB_API_KEY` | TMDB API key for movie data | Yes |
-| `DATABASE_URL` | PostgreSQL connection string | Yes |
-
-## Deploying to Vercel (Login/Sign-up)
-
-For login and registration to work on your Vercel deployment, you **must** set the database URL in Vercel:
-
-1. Open your project on [Vercel](https://vercel.com) → **Settings** → **Environment Variables**.
-2. Click **Add New** and set:
-   - **Name:** `DATABASE_URL` (exactly this)
-   - **Value:** your Aiven PostgreSQL connection string (same as in `.env` locally).  
-     Do **not** wrap the value in quotes.
-3. Select **Production** (and **Preview** if you use preview deployments), then **Save**.
-4. **Redeploy** the project (Deployments → ⋮ on latest → Redeploy), or push a new commit.
-
-If you see *"Sign-in/Sign-up is temporarily unavailable"* or *"Database not configured..."*, the API cannot see `DATABASE_URL`. Troubleshooting:
-
-1. **Verify the variable is set:**
-   - Go to Vercel → Project → Settings → Environment Variables
-   - Confirm `DATABASE_URL` exists (exact name, no typos)
-   - Check it's enabled for **Production** (and **Preview** if you use preview deployments)
-
-2. **Redeploy after adding/changing env vars:**
-   - Environment variables are baked into serverless functions at deploy time
-   - After adding `DATABASE_URL`, you **must** redeploy (Deployments → ⋮ → Redeploy)
-
-3. **Check function logs:**
-   - Vercel Dashboard → Deployments → Latest → Functions tab
-   - Look for logs like `[db.js] DATABASE_URL present: true/false`
-   - This will show if the variable is being read
-
-4. **Common issues:**
-   - Variable name typo (must be exactly `DATABASE_URL`)
-   - Variable set only for "Development" but testing Production
-   - Forgot to redeploy after adding the variable
-   - Special characters in connection string (ensure it's URL-encoded if needed)
+---
 
 ## License
 
@@ -228,4 +221,4 @@ MIT
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome; feel free to open a Pull Request.

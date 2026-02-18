@@ -1,5 +1,7 @@
 # Vercel setup – fix “no database” / sign up or login not working
 
+See [README.md](./README.md) for project overview, tech stack, and local setup.
+
 ## What’s going wrong
 
 On Vercel you only deploy the **frontend** (Vite) and the **auth API routes** in `/api`. Those API routes need your **PostgreSQL connection string** in an environment variable. If they don’t get it, they return **503** and the app shows “Database not configured” or “Sign-up / Sign-in is temporarily unavailable” and sign up / login effectively “don’t work” (or feel like a crash).
