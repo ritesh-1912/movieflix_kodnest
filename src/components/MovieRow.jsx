@@ -1,38 +1,48 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { IMAGE_BASE_URL } from '../utils/tmdb'
+
+// Throttle state updates so we don't re-render on every scroll pixel
+function useThrottledScrollCheck(rowRef, deps = []) {
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(true)
+  const [isMoved, setIsMoved] = useState(false)
+  const rafId = useRef(null)
+  const lastScrollLeft = useRef(-1)
+
+  const checkScroll = useCallback(() => {
+    if (!rowRef.current) return
+    const { scrollLeft, scrollWidth, clientWidth } = rowRef.current
+    if (lastScrollLeft.current === scrollLeft) return
+    lastScrollLeft.current = scrollLeft
+    setCanScrollLeft(scrollLeft > 0)
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10)
+    setIsMoved(scrollLeft > 0)
+  }, [])
+
+  useEffect(() => {
+    const row = rowRef.current
+    if (!row) return
+    checkScroll()
+    const onScroll = () => {
+      if (rafId.current !== null) return
+      rafId.current = requestAnimationFrame(() => {
+        checkScroll()
+        rafId.current = null
+      })
+    }
+    row.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      row.removeEventListener('scroll', onScroll)
+      if (rafId.current !== null) cancelAnimationFrame(rafId.current)
+    }
+  }, [checkScroll, ...deps])
+
+  return { canScrollLeft, canScrollRight, isMoved }
+}
 
 const MovieRow = ({ title, movies }) => {
   const rowRef = useRef(null)
-  const [isMoved, setIsMoved] = useState(false)
-  const [canScrollLeft, setCanScrollLeft] = useState(false)
-  const [canScrollRight, setCanScrollRight] = useState(true)
-
-  const checkScroll = () => {
-    if (rowRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = rowRef.current
-      setCanScrollLeft(scrollLeft > 0)
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10)
-      setIsMoved(scrollLeft > 0)
-    }
-  }
-
-  useEffect(() => {
-    checkScroll()
-    const row = rowRef.current
-    if (!row) return
-    row.addEventListener('scroll', checkScroll)
-    const onWheel = (e) => {
-      if (e.deltaY !== 0) {
-        e.preventDefault()
-        window.scrollBy(0, e.deltaY)
-      }
-    }
-    row.addEventListener('wheel', onWheel, { passive: false })
-    return () => {
-      row.removeEventListener('scroll', checkScroll)
-      row.removeEventListener('wheel', onWheel)
-    }
-  }, [movies])
+  const { canScrollLeft, canScrollRight } = useThrottledScrollCheck(rowRef, [movies])
 
   const handleClick = (direction) => {
     if (rowRef.current) {
@@ -76,23 +86,23 @@ const MovieRow = ({ title, movies }) => {
           </button>
         )}
 
-        {/* Movie Row - vertical wheel scrolls the page; use arrows to scroll row horizontally */}
+        {/* Movie Row: native scroll (vertical = page, horizontal = row). Arrows for mouse. */}
         <div
           ref={rowRef}
-          className="flex space-x-2 md:space-x-3 lg:space-x-4 overflow-x-scroll scrollbar-hide px-4 md:px-8 scroll-smooth pb-2 snap-x snap-mandatory"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          className="flex space-x-2 md:space-x-3 lg:space-x-4 overflow-x-auto overflow-y-hidden scrollbar-hide px-4 md:px-8 pb-2 snap-x snap-mandatory"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
         >
           {movies.map((movie, index) => (
             <div
               key={movie.id}
-              className="min-w-[140px] md:min-w-[200px] lg:min-w-[240px] cursor-pointer transform transition-all duration-500 ease-out hover:scale-110 hover:z-30 relative group/item snap-start"
+              className="min-w-[140px] md:min-w-[200px] lg:min-w-[240px] cursor-pointer transform transition-transform duration-200 ease-out hover:scale-105 hover:z-30 relative group/item snap-start"
               style={{ animationDelay: `${index * 0.05}s` }}
             >
-              <div className="relative overflow-hidden rounded-md shadow-lg group-hover/item:shadow-2xl transition-all duration-500">
+              <div className="relative overflow-hidden rounded-md shadow-lg group-hover/item:shadow-xl transition-shadow duration-200">
                 <img
                   src={`${IMAGE_BASE_URL}${movie.poster_path}`}
                   alt={movie.title || movie.name}
-                  className="w-full h-auto object-cover transition-transform duration-700 group-hover/item:scale-105"
+                  className="w-full h-auto object-cover transition-transform duration-200 group-hover/item:scale-105"
                   loading="lazy"
                   onError={(e) => {
                     e.target.src =
@@ -100,10 +110,9 @@ const MovieRow = ({ title, movies }) => {
                   }}
                 />
                 {/* Overlay on hover */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover/item:opacity-100 transition-opacity duration-300"></div>
-                
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover/item:opacity-100 transition-opacity duration-200" />
                 {/* Movie info on hover */}
-                <div className="absolute bottom-0 left-0 right-0 p-3 transform translate-y-full group-hover/item:translate-y-0 transition-transform duration-300 bg-gradient-to-t from-black via-black/90 to-transparent">
+                <div className="absolute bottom-0 left-0 right-0 p-3 transform translate-y-full group-hover/item:translate-y-0 transition-transform duration-200 bg-gradient-to-t from-black via-black/90 to-transparent">
                   <h3 className="text-white text-sm font-semibold mb-1 line-clamp-2">
                     {movie.title || movie.name}
                   </h3>
