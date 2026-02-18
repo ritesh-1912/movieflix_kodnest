@@ -40,6 +40,11 @@ const Register = () => {
     }
   }
 
+  const handlePhoneChange = (e) => {
+    const v = e.target.value.replace(/\D/g, '')
+    setPhone_number(v)
+  }
+
   const inputClass = (name) =>
     `w-full px-4 py-3.5 rounded bg-neutral-800/90 border text-white placeholder-neutral-500 transition-all duration-200 focus:outline-none focus:ring-0 ${
       focused === name ? 'border-white bg-neutral-700/90' : 'border-neutral-600 hover:border-neutral-500'
@@ -113,14 +118,16 @@ const Register = () => {
                 <input
                   id="phone_number"
                   type="tel"
+                  inputMode="numeric"
                   value={phone_number}
-                  onChange={(e) => setPhone_number(e.target.value)}
+                  onChange={handlePhoneChange}
                   onFocus={() => setFocused('phone')}
                   onBlur={() => setFocused(null)}
                   required
                   autoComplete="tel"
-                  placeholder="Phone number"
+                  placeholder="Phone number (digits only)"
                   className={inputClass('phone')}
+                  pattern="[0-9]*"
                 />
               </div>
               <div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Header from '../components/Header'
 import Hero from '../components/Hero'
 import MovieRow from '../components/MovieRow'
+import Footer from '../components/Footer'
 import {
   getTrendingMovies,
   getTopRatedMovies,
@@ -99,6 +100,7 @@ const Home = () => {
           <MovieRow title="Comedy Movies" movies={comedyMovies} />
         )}
       </div>
+      <Footer />
     </div>
   )
 }

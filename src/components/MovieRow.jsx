@@ -19,9 +19,18 @@ const MovieRow = ({ title, movies }) => {
   useEffect(() => {
     checkScroll()
     const row = rowRef.current
-    if (row) {
-      row.addEventListener('scroll', checkScroll)
-      return () => row.removeEventListener('scroll', checkScroll)
+    if (!row) return
+    row.addEventListener('scroll', checkScroll)
+    const onWheel = (e) => {
+      if (e.deltaY !== 0) {
+        e.preventDefault()
+        window.scrollBy(0, e.deltaY)
+      }
+    }
+    row.addEventListener('wheel', onWheel, { passive: false })
+    return () => {
+      row.removeEventListener('scroll', checkScroll)
+      row.removeEventListener('wheel', onWheel)
     }
   }, [movies])
 
@@ -67,7 +76,7 @@ const MovieRow = ({ title, movies }) => {
           </button>
         )}
 
-        {/* Movie Row */}
+        {/* Movie Row - vertical wheel scrolls the page; use arrows to scroll row horizontally */}
         <div
           ref={rowRef}
           className="flex space-x-2 md:space-x-3 lg:space-x-4 overflow-x-scroll scrollbar-hide px-4 md:px-8 scroll-smooth pb-2 snap-x snap-mandatory"
