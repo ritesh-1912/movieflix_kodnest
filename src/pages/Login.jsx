@@ -33,7 +33,20 @@ const Login = () => {
       login(res.user)
       navigate('/', { replace: true })
     } catch (err) {
-      setError(err.response?.data?.error || 'Invalid username or password. Please try again.')
+      // Normalize different error shapes (backend string, Vercel JSON, network errors, etc.)
+      const responseData = err.response?.data
+      let message =
+        // Our backend: { error: '...' }
+        (responseData && typeof responseData === 'object' && responseData.error) ||
+        // Common shapes: { message: '...' }
+        (responseData && typeof responseData === 'object' && responseData.message) ||
+        // If backend sent a plain string body
+        (typeof responseData === 'string' ? responseData : null) ||
+        // Fallbacks
+        err.message ||
+        'Invalid username or password. Please try again.'
+
+      setError(message)
     } finally {
       setLoading(false)
     }
