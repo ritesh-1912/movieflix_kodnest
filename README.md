@@ -200,7 +200,27 @@ For login and registration to work on your Vercel deployment, you **must** set t
 3. Select **Production** (and **Preview** if you use preview deployments), then **Save**.
 4. **Redeploy** the project (Deployments → ⋮ on latest → Redeploy), or push a new commit.
 
-If you see *"Sign-in/Sign-up is temporarily unavailable"* or *"Database not configured..."*, the API cannot see `DATABASE_URL` — double-check the variable name and redeploy after saving.
+If you see *"Sign-in/Sign-up is temporarily unavailable"* or *"Database not configured..."*, the API cannot see `DATABASE_URL`. Troubleshooting:
+
+1. **Verify the variable is set:**
+   - Go to Vercel → Project → Settings → Environment Variables
+   - Confirm `DATABASE_URL` exists (exact name, no typos)
+   - Check it's enabled for **Production** (and **Preview** if you use preview deployments)
+
+2. **Redeploy after adding/changing env vars:**
+   - Environment variables are baked into serverless functions at deploy time
+   - After adding `DATABASE_URL`, you **must** redeploy (Deployments → ⋮ → Redeploy)
+
+3. **Check function logs:**
+   - Vercel Dashboard → Deployments → Latest → Functions tab
+   - Look for logs like `[db.js] DATABASE_URL present: true/false`
+   - This will show if the variable is being read
+
+4. **Common issues:**
+   - Variable name typo (must be exactly `DATABASE_URL`)
+   - Variable set only for "Development" but testing Production
+   - Forgot to redeploy after adding the variable
+   - Special characters in connection string (ensure it's URL-encoded if needed)
 
 ## License
 
