@@ -22,7 +22,7 @@ export function getLoginErrorMessage(err) {
   if (status === 400)
     return serverMessage || 'Please enter your username and password.'
   if (status === 503)
-    return 'Sign-in is temporarily unavailable. Please try again later.'
+    return serverMessage || 'Sign-in is temporarily unavailable. Please try again later.'
   if (status >= 500)
     return 'Something went wrong on our end. Please try again later.'
 
@@ -41,7 +41,7 @@ export function getRegisterErrorMessage(err) {
   if (status === 400)
     return serverMessage || 'Please fill in all fields correctly.'
   if (status === 503)
-    return 'Sign-up is temporarily unavailable. Please try again later.'
+    return serverMessage || 'Sign-up is temporarily unavailable. Please try again later.'
   if (status >= 500)
     return 'Something went wrong on our end. Please try again later.'
 

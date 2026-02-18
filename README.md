@@ -188,6 +188,20 @@ movieflix_kodnest/
 | `VITE_TMDB_API_KEY` | TMDB API key for movie data | Yes |
 | `DATABASE_URL` | PostgreSQL connection string | Yes |
 
+## Deploying to Vercel (Login/Sign-up)
+
+For login and registration to work on your Vercel deployment, you **must** set the database URL in Vercel:
+
+1. Open your project on [Vercel](https://vercel.com) → **Settings** → **Environment Variables**.
+2. Click **Add New** and set:
+   - **Name:** `DATABASE_URL` (exactly this)
+   - **Value:** your Aiven PostgreSQL connection string (same as in `.env` locally).  
+     Do **not** wrap the value in quotes.
+3. Select **Production** (and **Preview** if you use preview deployments), then **Save**.
+4. **Redeploy** the project (Deployments → ⋮ on latest → Redeploy), or push a new commit.
+
+If you see *"Sign-in/Sign-up is temporarily unavailable"* or *"Database not configured..."*, the API cannot see `DATABASE_URL` — double-check the variable name and redeploy after saving.
+
 ## License
 
 MIT
