@@ -218,7 +218,3 @@ Created automatically on first use (Express or Vercel).
 ## License
 
 MIT
-
-## Contributing
-
-Contributions are welcome; feel free to open a Pull Request.
